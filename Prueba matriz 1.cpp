@@ -15,6 +15,7 @@ void gotoxy(int x, int y)
 }
 
 void dibujarMatriz()
+	
 {
 	int inicioX = 2;  // Ajustar el valor según la posición deseada de la matriz en la pantalla
 	int inicioY = 2;  // Ajustar el valor según la posición deseada de la matriz en la pantalla
@@ -43,6 +44,7 @@ void dibujarMatriz()
 
 int main()
 {
+	
 	system("cls");
 	system("color 17");
 	dibujarMatriz();
