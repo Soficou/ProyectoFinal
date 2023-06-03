@@ -44,6 +44,7 @@ void dibujarMatriz()
 int main()
 {
 	system("cls");
+	system("color 17");
 	dibujarMatriz();
 	
 	return 0;
