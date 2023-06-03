@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
-#include <conio.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -88,7 +87,36 @@ int main() {
 	// Bucle para mover el carácter representativo
 	char character = '>';
 	
+	// Mostrar la matriz inicial sin borrar la pantalla
+	for (int i = 0; i < filas; ++i) {
+		for (int j = 0; j < columnas; ++j) {
+			if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1)) {
+				gotoxy(j * 6, i * 2);
+				std::cout << "|" << character << "   ";
+			} else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
+				(i == posY && (j == posX - 1 || j == posX + 1)) ||
+				(i == posY + 1 && j >= posX - 1 && j <= posX + 1)) {
+				gotoxy(j * 6, i * 2);
+				std::cout << "|" << intToString(matriz[i][j]);
+			} else {
+					gotoxy(j * 6, i * 2);
+					std::cout << "|      ";
+				}
+		}
+		std::cout << "|" << std::endl;
+	}
+	
+	// Mostrar los valores para la validación
+	gotoxy(0, filas * 2 + 2);
+	std::cout << "Resultado = (" << arriba << " + " << derecha << " + " << abajo << ") * " << izquierda << " = "
+		<< (arriba + derecha + abajo) * izquierda << std::endl;
+	
+	// Bucle para mover el carácter representativo
 	while (intentos > 0) {
+		// Esperar antes de continuar al siguiente movimiento
+		Sleep(1000);
+		
+		// Limpiar la pantalla antes de mostrar el siguiente movimiento
 		clearScreen();
 		
 		// Mostrar la matriz con los números visibles
@@ -115,58 +143,39 @@ int main() {
 		std::cout << "Resultado = (" << arriba << " + " << derecha << " + " << abajo << ") * " << izquierda << " = "
 			<< (arriba + derecha + abajo) * izquierda << std::endl;
 		
-		// Solicitar al usuario el resultado del cálculo
-		std::cout << std::endl << "Ingrese el resultado del cálculo: ";
-		int resultado;
-		std::cin >> resultado;
+		// Solicitar al usuario el movimiento
+		std::cout << std::endl << "Ingrese el movimiento (W: arriba, S: abajo, A: izquierda, D: derecha): ";
+		char movimiento;
+		std::cin >> movimiento;
 		
-		// Validar el resultado
-		if (resultado == (arriba + derecha + abajo) * izquierda) {
-			std::cout << "Correcto!" << std::endl;
-		} else {
-			std::cout << "Incorrecto. El resultado correcto es " << (arriba + derecha + abajo) * izquierda << "."
-				<< std::endl;
-		}
-		
-		// Mover el personaje según la entrada del usuario
-		char movimiento = _getch();
+		// Actualizar la posición del personaje según el movimiento del usuario
 		switch (movimiento) {
-		case 'w': // Arriba
 		case 'W':
-			if (posY > 0) {
+		case 'w':
+			if (posY > 1) {
 				--posY;
 			}
 			break;
-		case 'a': // Izquierda
-		case 'A':
-			if (posX > 0) {
-				--posX;
-			}
-			break;
-		case 's': // Abajo
 		case 'S':
-			if (posY < filas - 1) {
+		case 's':
+			if (posY < filas - 2) {
 				++posY;
 			}
 			break;
-		case 'd': // Derecha
+		case 'A':
+		case 'a':
+			if (posX > 1) {
+				--posX;
+			}
+			break;
 		case 'D':
-			if (posX < columnas - 1) {
+		case 'd':
+			if (posX < columnas - 2) {
 				++posX;
 			}
 			break;
 		default:
 			break;
-		}
-		
-		intentos--;
-		
-		// Actualizar los números en las celdas cercanas al personaje
-		for (int i = posY - 1; i <= posY + 1; ++i) {
-			for (int j = posX - 1; j <= posX + 1; ++j) {
-				int numero = rand() % (max - min + 1) + min;
-				matriz[i][j] = numero;
-			}
 		}
 		
 		// Calcular los nuevos valores para la validación
@@ -178,25 +187,21 @@ int main() {
 		// Agregar el resultado de la operación a la meta
 		resultados.push_back((arriba + derecha + abajo) * izquierda);
 		
-		// Esperar antes de continuar al siguiente movimiento
-		Sleep(1000);
+		// Actualizar el personaje y la matriz en la pantalla
+		clearScreen();
 	}
 	
-	// Comprobar si se ha alcanzado la meta
-	bool ganado = true;
-	for (int resultado : resultados) {
-		if (resultado == 0) {
-			ganado = false;
-			break;
-		}
-	}
+	// Comprobar si el usuario ha ganado o perdido
+	bool ganado = std::find(resultados.begin(), resultados.end(), resultados[0]) == resultados.end();
 	
-	// Mostrar el mensaje de ganador o perdedor
+	// Limpiar la pantalla antes de mostrar el resultado final
 	clearScreen();
+	
+	// Mostrar el resultado final
 	if (ganado) {
-		std::cout << "¡Felicidades! Has completado la meta." << std::endl;
+		std::cout << "¡Felicidades! Has ganado." << std::endl;
 	} else {
-		std::cout << "Lo siento, no has logrado completar la meta." << std::endl;
+		std::cout << "Lo siento, has perdido." << std::endl;
 	}
 	
 	return 0;
