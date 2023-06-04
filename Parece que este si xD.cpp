@@ -5,46 +5,67 @@
 #include <ctime>
 #include <cstdlib>
 #include <conio.h>
-
-#ifdef _WIN32
 #include <windows.h>
-#else
-#include <unistd.h>
-#define Sleep(x) usleep((x)*1000)
-#endif
+
+#define ANCHO 11
+#define ALTO 5
 
 // Función para convertir un entero en una cadena
-std::string intToString(int number) {
+std::string intToString(int number)
+{
 	std::stringstream ss;
 	ss << std::setw(4) << std::setfill(' ') << number;
 	return ss.str();
 }
 
 // Función para limpiar la pantalla en Windows
-void clearScreen() {
-#ifdef _WIN32
+void clearScreen()
+{
 	std::system("cls");
-#else
-	std::system("clear");
-#endif
 }
 
-#ifdef _WIN32
-void gotoxy(int x, int y) {
-	COORD coord;
-	coord.X = x;
-	coord.Y = y;
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+void gotoxy(int x, int y)
+{
+	HANDLE hCon;
+	hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD dwPos;
+	dwPos.X = x;
+	dwPos.Y = y;
+	SetConsoleCursorPosition(hCon, dwPos);
 }
-#else
-void gotoxy(int x, int y) {
-	printf("\033[%d;%df", y + 1, x + 1);
-	fflush(stdout);
-}
-#endif
 
-int main() {
+void dibujarCuadro(int x, int y)
+{
+	for (int i = 0; i < ALTO; i++)
+	{
+		gotoxy(x, y + i);
+		std::cout << char(179);
+		gotoxy(x + ANCHO, y + i);
+		std::cout << char(179);
+	}
+	
+	for (int i = 0; i <= ANCHO; i++)
+	{
+		gotoxy(x + i, y);
+		std::cout << char(196);
+		gotoxy(x + i, y + ALTO - 1);
+		std::cout << char(196);
+	}
+	
+	gotoxy(x, y);
+	std::cout << char(218);
+	gotoxy(x + ANCHO, y);
+	std::cout << char(191);
+	gotoxy(x, y + ALTO - 1);
+	std::cout << char(192);
+	gotoxy(x + ANCHO, y + ALTO - 1);
+	std::cout << char(217);
+}
+
+int main()
+{
 	system("color 17");
+	
 	// Inicializar el generador de números aleatorios con una semilla basada en el tiempo actual
 	srand(time(0));
 	
@@ -70,8 +91,10 @@ int main() {
 	std::vector<int> resultados;
 	
 	// Generar números aleatorios en las celdas cercanas al personaje
-	for (int i = posY - 1; i <= posY + 1; ++i) {
-		for (int j = posX - 1; j <= posX + 1; ++j) {
+	for (int i = posY - 1; i <= posY + 1; ++i)
+	{
+		for (int j = posX - 1; j <= posX + 1; ++j)
+		{
 			int numero = rand() % (max - min + 1) + min;
 			matriz[i][j] = numero;
 		}
@@ -95,39 +118,52 @@ int main() {
 	// Mostrar la matriz inicial
 	clearScreen();
 	
-	while (intentos > 0) {
+	while (intentos > 0)
+	{
 		// Mostrar la matriz con los números visibles
-		for (int i = 0; i < filas; ++i) {
-			for (int j = 0; j < columnas; ++j) {
-				if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1)) {
+		for (int i = 0; i < filas; ++i)
+		{
+			for (int j = 0; j < columnas; ++j)
+			{
+				if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1))
+				{
 					gotoxy(j * 6, i * 2);
-					std::cout << "†" << character << "   ";
-				} else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
+					std::cout << "|" << character << "   ";
+				}
+				else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
 					(i == posY && (j == posX - 1 || j == posX + 1)) ||
-					(i == posY + 1 && j >= posX - 1 && j <= posX + 1)) {
+					(i == posY + 1 && j >= posX - 1 && j <= posX + 1))
+				{
 					gotoxy(j * 6, i * 2);
-					std::cout << "†" << intToString(matriz[i][j]);
-				} else {
+					std::cout << "|" << intToString(matriz[i][j]);
+				}
+				else
+					{
 						gotoxy(j * 6, i * 2);
-						std::cout << "†      ";
+						std::cout << "|      ";
 					}
 			}
-			std::cout << "†" << std::endl;
+			std::cout << "|" << std::endl;
 		}
 		
 		// Mostrar los valores para la validación
 		gotoxy(0, filas * 2 + 2);
 		// Solicitar al usuario el resultado del cálculo
-		std::cout << std::endl << "Ingrese el resultado del cálculo: ";
+		std::cout << std::endl
+			<< "Ingrese el resultado del cálculo: ";
 		int resultado;
 		std::cin >> resultado;
 		
 		// Validar el resultado
 		bool acierto = (resultado == ((arriba * derecha) - (abajo * izquierda)));
-		if (acierto) {
+		if (acierto)
+		{
 			std::cout << "Correcto!" << std::endl;
-			std::cout << std::endl << "Ingrese el movimiento (W: arriba, S: abajo, A: izquierda, D: derecha): ";
-		} else {
+			std::cout << std::endl
+				<< "Ingrese el movimiento (W: arriba, S: abajo, A: izquierda, D: derecha): ";
+		}
+		else
+		{
 			std::cout << "Incorrecto. El resultado correcto es " << ((arriba * derecha) - (abajo * izquierda)) << "."
 				<< std::endl;
 		}
@@ -138,30 +174,37 @@ int main() {
 		
 		// Actualizar la posición del personaje según la tecla presionada
 		key = _getch();
-		switch (key) {
+		switch (key)
+		{
 		case 'w': // Arriba
 		case 'W':
-			if (posY > 1) posY--;
+			if (posY > 1)
+				posY--;
 			break;
 		case 'a': // Izquierda
 		case 'A':
-			if (posX > 1) posX--;
+			if (posX > 1)
+				posX--;
 			break;
 		case 's': // Abajo
 		case 'S':
-			if (posY < filas - 2) posY++;
+			if (posY < filas - 2)
+				posY++;
 			break;
 		case 'd': // Derecha
 		case 'D':
-			if (posX < columnas - 2) posX++;
+			if (posX < columnas - 2)
+				posX++;
 			break;
 		default:
 			break;
 		}
 		
 		// Actualizar los números en las celdas cercanas al personaje
-		for (int i = posYAnterior - 1; i <= posYAnterior + 1; ++i) {
-			for (int j = posXAnterior - 1; j <= posXAnterior + 1; ++j) {
+		for (int i = posYAnterior - 1; i <= posYAnterior + 1; ++i)
+		{
+			for (int j = posXAnterior - 1; j <= posXAnterior + 1; ++j)
+			{
 				int numero = rand() % (max - min + 1) + min;
 				matriz[i][j] = numero;
 			}
@@ -184,17 +227,24 @@ int main() {
 	}
 	
 	// Mostrar la matriz final con los números visibles
-	for (int i = 0; i < filas; ++i) {
-		for (int j = 0; j < columnas; ++j) {
-			if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1)) {
+	for (int i = 0; i < filas; ++i)
+	{
+		for (int j = 0; j < columnas; ++j)
+		{
+			if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1))
+			{
 				gotoxy(j * 6, i * 2);
 				std::cout << "|" << character << "   ";
-			} else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
+			}
+			else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
 				(i == posY && (j == posX - 1 || j == posX + 1)) ||
-				(i == posY + 1 && j >= posX - 1 && j <= posX + 1)) {
+				(i == posY + 1 && j >= posX - 1 && j <= posX + 1))
+			{
 				gotoxy(j * 6, i * 2);
 				std::cout << "|" << intToString(matriz[i][j]);
-			} else {
+			}
+			else
+				{
 					gotoxy(j * 6, i * 2);
 					std::cout << "|      ";
 				}
@@ -205,9 +255,11 @@ int main() {
 	// Mostrar los resultados de las operaciones en la meta
 	gotoxy(0, filas * 2 + 2);
 	std::cout << "Resultados en la meta: ";
-	for (int i = 0; i < resultados.size(); ++i) {
+	for (int i = 0; i < resultados.size(); ++i)
+	{
 		std::cout << resultados[i];
-		if (i < resultados.size() - 1) {
+		if (i < resultados.size() - 1)
+		{
 			std::cout << ", ";
 		}
 	}
@@ -218,24 +270,6 @@ int main() {
 	
 	// Mostrar el resultado final
 	std::cout << "El resultado final es: " << resultadoFinal << std::endl;
-	
-	bool ganado = true;
-	for (int resultado : resultados) {
-		if (resultado == 0) {
-			ganado = false;
-			break;
-		}
-	}
-	
-	// Mostrar el mensaje de ganador o perdedor
-	clearScreen();
-	if (ganado) {
-		std::cout << "¡Felicidades! Has completado la meta." << std::endl;
-	} else {
-		std::cout << "Lo siento, no has logrado completar la meta." << std::endl;
-	}
-	
-	system("color 17");
 	
 	return 0;
 }
