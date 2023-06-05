@@ -1,10 +1,10 @@
-#include <iostream>
+# include <iostream>
 #include <vector>
 #include <iomanip>
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
-#include <sstream>
+#include <conio.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -71,28 +71,31 @@ int main() {
 	// Generar números aleatorios en las celdas cercanas al personaje
 	for (int i = posY - 1; i <= posY + 1; ++i) {
 		for (int j = posX - 1; j <= posX + 1; ++j) {
-			if (i >= 0 && i < filas && j >= 0 && j < columnas) {
-				int numero = rand() % (max - min + 1) + min;
-				matriz[i][j] = numero;
-			}
+			int numero = rand() % (max - min + 1) + min;
+			matriz[i][j] = numero;
 		}
 	}
 	
 	// Calcular los valores para la validación
 	int arriba = matriz[posY - 1][posX] + matriz[posY - 1][posX - 1] + matriz[posY - 1][posX + 1];
+	int derecha = matriz[posY][posX + 1];
 	int izquierda = matriz[posY][posX - 1];
 	int abajo = matriz[posY + 1][posX] + matriz[posY + 1][posX - 1] + matriz[posY + 1][posX + 1];
-	int derecha = matriz[posY][posX + 1];
+	
 	
 	// Agregar el resultado de la operación a la meta
-	resultados.push_back((arriba + derecha + abajo) * izquierda);
+	resultados.push_back((arriba*derecha)-(abajo*izquierda));
 	
 	// Bucle para mover el carácter representativo
 	char character = '>';
 	
+	// Variable para almacenar la tecla presionada
+	char key;
+	
+	// Mostrar la matriz inicial
+	clearScreen();
+	
 	while (intentos > 0) {
-		clearScreen();
-		
 		// Mostrar la matriz con los números visibles
 		for (int i = 0; i < filas; ++i) {
 			for (int j = 0; j < columnas; ++j) {
@@ -114,54 +117,54 @@ int main() {
 		
 		// Mostrar los valores para la validación
 		gotoxy(0, filas * 2 + 2);
-		std::cout << "Resultado = (" << arriba << " + " << derecha << " + " << abajo << ") * " << izquierda << " = "
-			<< (arriba + derecha + abajo) * izquierda << std::endl;
+		std::cout << "Resultado = " << arriba << " * " << derecha << " - " << abajo << " * " << izquierda << " = "
+			<< ((arriba*derecha)-(abajo*izquierda)) << std::endl;
 		
 		// Solicitar al usuario el resultado del cálculo
+
 		std::cout << std::endl << "Ingrese el resultado del cálculo: ";
 		int resultado;
 		std::cin >> resultado;
 		
+		
 		// Validar el resultado
-		if (resultado == (arriba + derecha + abajo) * izquierda) {
+		if (resultado == ((arriba*derecha)-(abajo*izquierda))) {
 			std::cout << "Correcto!" << std::endl;
+			std::cout << std::endl << "Ingrese el movimiento (W: arriba, S: abajo, A: izquierda, D: derecha): ";
 		} else {
-			std::cout << "Incorrecto. El resultado correcto es " << (arriba + derecha + abajo) * izquierda << "."
+			std::cout << "Incorrecto. El resultado correcto es " << ((arriba*derecha)-(abajo*izquierda)) << "."
 				<< std::endl;
 		}
 		
-		// Mover el personaje según la entrada del usuario
-		char movimiento;
-		std::cout << "Ingrese la dirección de movimiento (W, A, S, D): ";
-		std::cin >> movimiento;
-		
-		switch (movimiento) {
+		// Actualizar la posición del personaje según la tecla presionada
+		key = _getch();
+		switch (key) {
+		case 'w': // Arriba
 		case 'W':
-		case 'w':
-			if (posY > 1) {
-				--posY;
-			}
+			if (posY > 1) posY--;
 			break;
-		case 'S':
-		case 's':
-			if (posY < filas - 2) {
-				++posY;
-			}
-			break;
+		case 'a': // Izquierda
 		case 'A':
-		case 'a':
-			if (posX > 1) {
-				--posX;
-			}
+			if (posX > 1) posX--;
 			break;
+		case 's': // Abajo
+		case 'S':
+			if (posY < filas - 2) posY++;
+			break;
+		case 'd': // Derecha
 		case 'D':
-		case 'd':
-			if (posX < columnas - 2) {
-				++posX;
-			}
+			if (posX < columnas - 2) posX++;
 			break;
 		default:
 			break;
+		}
+		
+		// Actualizar los números en las celdas cercanas al personaje
+		for (int i = posY - 1; i <= posY + 1; ++i) {
+			for (int j = posX - 1; j <= posX + 1; ++j) {
+				int numero = rand() % (max - min + 1) + min;
+				matriz[i][j] = numero;
+			}
 		}
 		
 		// Calcular los nuevos valores para la validación
@@ -171,47 +174,56 @@ int main() {
 		derecha = matriz[posY][posX + 1];
 		
 		// Agregar el resultado de la operación a la meta
-		resultados.push_back((arriba + derecha + abajo) * izquierda);
+		resultados.push_back((arriba*derecha)-(abajo*izquierda));
 		
-		// Comprobar si se alcanzó la meta
-		if (posX == columnas - 1 && posY == filas - 1) {
-			clearScreen();
-			std::cout << "¡Felicidades! Has alcanzado la meta." << std::endl;
-			std::cout << "Resultados obtenidos: ";
-			for (int i = 0; i < resultados.size(); ++i) {
-				std::cout << resultados[i];
-				if (i < resultados.size() - 1) {
-					std::cout << ", ";
+		// Reducir los intentos restantes
+		intentos--;
+		
+		// Limpiar la pantalla para el siguiente movimiento
+		clearScreen();
+	}
+	
+	// Mostrar la matriz final con los números visibles
+	for (int i = 0; i < filas; ++i) {
+		for (int j = 0; j < columnas; ++j) {
+			if ((i == posY && j == posX) || (i == filas - 1 && j == columnas - 1)) {
+				gotoxy(j * 6, i * 2);
+				std::cout << "|" << character << "   ";
+			} else if ((i == posY - 1 && j >= posX - 1 && j <= posX + 1) ||
+				(i == posY && (j == posX - 1 || j == posX + 1)) ||
+				(i == posY + 1 && j >= posX - 1 && j <= posX + 1)) {
+				gotoxy(j * 6, i * 2);
+				std::cout << "|" << intToString(matriz[i][j]);
+			} else {
+					gotoxy(j * 6, i * 2);
+					std::cout << "|      ";
 				}
-			}
-			std::cout << std::endl;
-			return 0;
 		}
-		
-		--intentos;
+		std::cout << "|" << std::endl;
 	}
 	
-	clearScreen();
-	bool ganado = true;
-	for (int resultado : resultados) {
-		if (resultado == 0) {
-			ganado = false;
-			break;
+	// Mostrar los resultados de las operaciones en la meta
+	gotoxy(0, filas * 2 + 2);
+	std::cout << "Resultados en la meta: ";
+	for (int i = 0; i < resultados.size(); ++i) {
+		std::cout << resultados[i];
+		if (i < resultados.size() - 1) {
+			std::cout << ", ";
 		}
 	}
+	std::cout << std::endl;
 	
-	if (ganado) {
+	// Calcular el resultado final
+	int resultadoFinal = resultados[0] - resultados[1];
+	
+	// Mostrar el resultado final
+	std::cout << "El resultado final es: " << resultadoFinal << std::endl;
+	
+	// Verificar si se alcanzó la meta o se agotaron los intentos
+	if (resultadoFinal == 0) {
 		std::cout << "¡Felicidades! Has alcanzado la meta." << std::endl;
-		std::cout << "Resultados obtenidos: ";
-		for (int i = 0; i < resultados.size(); ++i) {
-			std::cout << resultados[i];
-			if (i < resultados.size() - 1) {
-				std::cout << ", ";
-			}
-		}
-		std::cout << std::endl;
 	} else {
-		std::cout << "Lo siento, no has logrado completar la meta." << std::endl;
+		std::cout << "Lo siento, has agotado tus intentos. Mejor suerte la próxima vez." << std::endl;
 	}
 	
 	return 0;

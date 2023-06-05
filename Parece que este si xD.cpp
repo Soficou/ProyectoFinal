@@ -85,7 +85,7 @@ int main()
 	int posY = rand() % (filas - 2) + 1;
 	
 	// Número de intentos restantes
-	int intentos = 8;
+	int intentos = 3;
 	
 	// Resultados de las operaciones almacenados en la meta
 	std::vector<int> resultados;
@@ -273,3 +273,4 @@ int main()
 	
 	return 0;
 }
+	

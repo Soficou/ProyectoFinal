@@ -115,7 +115,7 @@ int main() {
 			}
 			std::cout << "|" << std::endl;
 		}
-		
+			
 		// Mostrar los valores para la validaci n
 		gotoxy(0, filas * 2 + 2);
 		// Solicitar al usuario el resultado del c lculo
